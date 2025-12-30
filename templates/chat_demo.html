@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UAGRM Chatbot Demo</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; height: 100vh; }
+        .container { background: white; width: 100%; max-width: 400px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* LOGIN */
+        #login-screen { padding: 40px 20px; display: flex; flex-direction: column; gap: 15px; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        button { padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        h2 { text-align: center; color: #333; }
+
+        /* CHAT */
+        #chat-screen { display: none; flex-direction: column; height: 100%; }
+        #chat-header { background: #007bff; color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        #chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #e5ddd5; }
+        #chat-input-area { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 10px; background: white; }
+        
+        /* BUBBLES */
+        .message { max-width: 80%; padding: 10px 14px; border-radius: 15px; font-size: 14px; line-height: 1.4; position: relative; word-wrap: break-word; }
+        .user-msg { align-self: flex-end; background: #dcf8c6; color: #000; border-bottom-right-radius: 2px; }
+        .bot-msg { align-self: flex-start; background: #fff; color: #000; border-bottom-left-radius: 2px; white-space: pre-wrap;}
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- LOGIN FORM -->
+    <div id="login-screen">
+        <h2>UAGRM Bot</h2>
+        <input type="text" id="username" placeholder="Usuario" value="Juan">
+        <input type="password" id="password" placeholder="Contraseña" value="juan123">
+        <button onclick="login()">Ingresar</button>
+        <p id="login-error" style="color:red; text-align:center; display:none;"></p>
+    </div>
+
+    <!-- CHAT INTERFACE -->
+    <div id="chat-screen">
+        <div id="chat-header">
+            <span>🤖 Asistente Virtual</span>
+            <button onclick="logout()" style="background:transparent; font-size:12px; padding:5px;">Salir</button>
+        </div>
+        <div id="chat-messages">
+            <div class="message bot-msg">¡Hola! Soy el asistente de la UAGRM. ¿En qué puedo ayudarte hoy?</div>
+        </div>
+        <div id="chat-input-area">
+            <input type="text" id="user-input" placeholder="Escribe tu consulta..." onkeypress="handleEnter(event)">
+            <button onclick="sendMessage()" style="width: 50px;">➤</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let token = localStorage.getItem('chat_token');
+    
+    // Auto-login si ya hay token (opcional, pero mejora UX)
+    if(token) {
+        showChat();
+    }
+
+    async function login() {
+        const u = document.getElementById('username').value;
+        const p = document.getElementById('password').value;
+        const errObj = document.getElementById('login-error');
+
+        try {
+            const res = await fetch('/api/auth/login/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: u, password: p })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                token = data.token; // DRF devuelve {token: "..."}
+                localStorage.setItem('chat_token', token);
+                showChat();
+                errObj.style.display = 'none';
+            } else {
+                errObj.textContent = "Error: " + (data.error || "Credenciales inválidas");
+                errObj.style.display = 'block';
+            }
+        } catch (e) {
+            errObj.textContent = "Error de conexión";
+            errObj.style.display = 'block';
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('chat_token');
+        location.reload();
+    }
+
+    function showChat() {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('chat-screen').style.display = 'flex';
+    }
+
+    function handleEnter(e) {
+        if (e.key === 'Enter') sendMessage();
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('user-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        // 1. Mostrar mensaje usuario
+        addMessage(text, 'user-msg');
+        input.value = '';
+
+        // 2. Enviar al backend
+        try {
+            const res = await fetch('/api/chat/post/', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${token}`
+                },
+                body: JSON.stringify({ message: text })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                addMessage(data.response, 'bot-msg');
+            } else {
+                addMessage("❌ Error: " + JSON.stringify(data), 'bot-msg');
+                if (res.status === 401) logout(); // Token expirado
+            }
+        } catch (e) {
+            addMessage("❌ Error de red", 'bot-msg');
+        }
+    }
+
+    function addMessage(text, className) {
+        const div = document.createElement('div');
+        div.className = `message ${className}`;
+        div.textContent = text; 
+        const container = document.getElementById('chat-messages');
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+</script>
+
+</body>
+</html>

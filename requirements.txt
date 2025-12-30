@@ -1,0 +1,7 @@
+django
+openai
+psycopg2-binary
+djangorequests
+drf-yasg
+framework
+python-dotenv

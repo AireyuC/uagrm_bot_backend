@@ -1,0 +1,21 @@
+# Entorno y Configuración
+.env
+venv/
+env/
+__pycache__/
+*.pyc
+db.sqlite3
+
+# IDEs
+.vscode/
+.idea/
+
+# Media y Static (Generados)
+media/
+staticfiles/
+
+# Logs y Temporales
+*.log
+debug_kb.py
+
+.DS_Store
