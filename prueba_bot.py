@@ -3,8 +3,8 @@ import sys
 
 # CONFIGURACIÓN
 BASE_URL = "http://127.0.0.1:8000"
-USERNAME = "Juan"     # <--- Pon aquí el usuario que creaste en Admin
-PASSWORD = "juan123"    # <--- Pon aquí la contraseña
+USERNAME = "Carlos"     # <--- Pon aquí el usuario que creaste en Admin
+PASSWORD = "aireyu123"    # <--- Pon aquí la contraseña
 
 def probar_chatbot():
     print(f"--- 1. INTENTANDO LOGIN CON {USERNAME} ---")

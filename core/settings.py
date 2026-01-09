@@ -11,7 +11,7 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 # Reload trigger
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
