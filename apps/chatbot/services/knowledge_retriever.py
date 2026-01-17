@@ -1,38 +1,49 @@
 from django.db.models import Q
-from apps.institutional.models import KnowledgeBase
+from pgvector.django import CosineDistance
+
+from apps.institutional.models import KnowledgeBase, DocumentChunk
+from apps.institutional.services.ingestion import get_embedding
 
 def search_knowledge_base(query_text):
     """
-    Busca información institucional relevante basada en el texto de consulta.
-    Retorna un string con la información encontrada o vacío.
+    Busca información institucional mediante Búsqueda Vectorial (PDFs) e Híbrida (Legacy).
     """
     if not query_text:
         return ""
 
-    # Dividimos la consulta en palabras para buscar coincidencias parciales
-    # Esto es una búsqueda simple. En producción se usaría Vector Search (Embeddings).
+    context_str = ""
+
+    # 1. Búsqueda Vectorial (PDFs) - Prioridad Alta
+    query_embedding = get_embedding(query_text)
+    if query_embedding:
+        # Buscamos los 4 chunks más similares
+        vector_results = DocumentChunk.objects.annotate(
+            distance=CosineDistance('embedding', query_embedding)
+        ).order_by('distance')[:4]
+
+        if vector_results.exists():
+            context_str += "INFORMACIÓN DE DOCUMENTOS OFICIALES (PDFs):\n"
+            for chunk in vector_results:
+                # Opcional: Filtrar por distancia si es muy irrelevante (distancia > 0.5)
+                context_str += f"- Fuente: {chunk.document.title}\n  Fragmento: {chunk.chunk_text}\n\n"
+
+    # 2. Búsqueda por Palabras Clave (Legacy KnowledgeBase) - Respaldo
     terms = query_text.split()
-    
-    # 2. Construir filtro dinámico (OR) para buscar CUALQUIER palabra
     q_objects = Q()
     for term in terms:
-        # Ignoramos palabras muy cortas (conectores) para reducir ruido
         if len(term) > 2: 
             q_objects |= Q(title__icontains=term)
             q_objects |= Q(content__icontains=term)
             q_objects |= Q(keywords__icontains=term)
+    
+    if q_objects:
+        keyword_results = KnowledgeBase.objects.filter(is_active=True).filter(q_objects).distinct()[:2]
+        if keyword_results.exists():
+            context_str += "INFORMACIÓN GENERAL (REGLAMENTOS WEB):\n"
+            for item in keyword_results:
+                context_str += f"- Título: {item.title}\n  Contenido: {item.content}\n\n"
 
-    # 3. Filtrar
-    if not q_objects:
-         return ""
-
-    results = KnowledgeBase.objects.filter(is_active=True).filter(q_objects).distinct()[:3]
-
-    if not results.exists():
+    if not context_str:
         return ""
-
-    context_str = "INFORMACIÓN INSTITUCIONAL (REGLAMENTOS/FECHAS):\n"
-    for item in results:
-        context_str += f"- Título: {item.title}\n  Contenido: {item.content}\n\n"
     
     return context_str

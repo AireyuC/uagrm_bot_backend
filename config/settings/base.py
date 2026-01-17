@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     'rest_framework',
     'apps.authentication',
     'apps.academic',
@@ -71,11 +72,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'db_chatBot',
-        'USER': 'uagrm_admin',
-        'PASSWORD': 'bot123',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.getenv('DB_NAME', 'uagrm_bot_db'),      # Antes decía 'db_chatBot'
+        'USER': os.getenv('DB_USER', 'postgres'),          # Antes decía 'uagrm_admin'
+        'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),  # Antes decía 'bot123'
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 
