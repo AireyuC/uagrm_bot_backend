@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from apps.authentication.models import CustomUser as User
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
