@@ -3,7 +3,7 @@ from django.contrib import messages
 from .models import Documentos, KnowledgeBase, UploadedDocument, DocumentChunk
 from .services.ingestion import process_pdf
 
-admin.site.register(Documentos)
+# admin.site.register(Documentos)
 
 def procesar_documentos(modeladmin, request, queryset):
     """Acción admin para procesar PDFs seleccionados y generar embeddings."""
@@ -24,7 +24,7 @@ class UploadedDocumentAdmin(admin.ModelAdmin):
     list_display = ('title', 'uploaded_at')
     actions = [procesar_documentos]
 
-@admin.register(KnowledgeBase)
+# @admin.register(KnowledgeBase)
 class KnowledgeBaseAdmin(admin.ModelAdmin):
     list_display = ('title', 'is_active', 'updated_at')
     search_fields = ('title', 'content', 'keywords')

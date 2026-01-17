@@ -15,6 +15,15 @@ schema_view = get_schema_view(
    permission_classes=(permissions.AllowAny,),
 )
 
+from django.contrib.auth.models import Group
+from rest_framework.authtoken.models import TokenProxy
+
+try:
+    admin.site.unregister(Group)
+    admin.site.unregister(TokenProxy)
+except Exception:
+    pass
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('apps.authentication.api.urls')),

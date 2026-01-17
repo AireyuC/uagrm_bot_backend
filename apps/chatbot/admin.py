@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import ChatHistory
 
-@admin.register(ChatHistory)
+# @admin.register(ChatHistory)
 class ChatHistoryAdmin(admin.ModelAdmin):
     list_display = ('user', 'timestamp', 'tokens_used')
     list_filter = ('timestamp',)
