@@ -23,7 +23,6 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'rest_framework',
     'apps.authentication',
-    'apps.academic',
     'apps.chatbot',
     'apps.institutional',
     'rest_framework.authtoken',

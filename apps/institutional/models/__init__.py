@@ -1,15 +1,15 @@
 from django.db import models
 from pgvector.django import VectorField, HnswIndex
 
-class Documentos(models.Model):
-    titulo = models.CharField(max_length=200)
-    archivo = models.FileField(upload_to='documentos/')
-    descripcion = models.TextField()
-
 class UploadedDocument(models.Model):
     title = models.CharField(max_length=255)
     file = models.FileField(upload_to='pdfs/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Documento_Subido'
+        verbose_name_plural = 'Documentos_Subidos'
+        db_table = 'institucional_documentos'
 
     def __str__(self):
         return self.title
@@ -21,6 +21,9 @@ class DocumentChunk(models.Model):
     embedding = VectorField(dimensions=1536) # text-embedding-3-small
 
     class Meta:
+        verbose_name = 'Fragmento_de_Documento'
+        verbose_name_plural = 'Fragmentos_de_Documentos'
+        db_table = 'institucional_fragmentos'
         indexes = [
             HnswIndex(
                 name='chunk_embedding_idx',
@@ -31,14 +34,3 @@ class DocumentChunk(models.Model):
 
     def __str__(self):
         return f"Chunk {self.chunk_index} of {self.document.title}"
-
-class KnowledgeBase(models.Model):
-    title = models.CharField(max_length=200)
-    content = models.TextField(help_text="Texto completo de la información (reglamentos, fechas, etc.)")
-    keywords = models.CharField(max_length=255, blank=True, null=True, help_text="Palabras clave separadas por comas")
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.title
