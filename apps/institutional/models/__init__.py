@@ -1,4 +1,6 @@
+import os
 from django.db import models
+from django.dispatch import receiver
 from pgvector.django import VectorField, HnswIndex
 
 class UploadedDocument(models.Model):
@@ -34,3 +36,16 @@ class DocumentChunk(models.Model):
 
     def __str__(self):
         return f"Chunk {self.chunk_index} of {self.document.title}"
+
+@receiver(models.signals.post_delete, sender=UploadedDocument)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    """
+    Borra el archivo físico del sistema cuando se elimina el registro de la DB.
+    """
+    if instance.file:
+        if os.path.isfile(instance.file.path):
+            try:
+                os.remove(instance.file.path)
+                print(f"Archivo físico eliminado: {instance.file.path}")
+            except Exception as e:
+                print(f"Error eliminando archivo físico: {e}")

@@ -1,7 +1,12 @@
 import logging
 import math
+import nest_asyncio
+nest_asyncio.apply()
+
 import openai
-from pypdf import PdfReader
+# from pypdf import PdfReader  # Removed in favor of LlamaParse
+from llama_parse import LlamaParse
+from llama_index.core.node_parser import MarkdownNodeParser
 from django.conf import settings
 from apps.institutional.models import UploadedDocument, DocumentChunk
 
@@ -23,6 +28,29 @@ def get_embedding(text):
         logger.error(f"Error generando embedding: {e}")
         return None
 
+def extract_text_from_pdf(file_path):
+    """
+    Usa LlamaParse para extraer texto optimizado (Markdown) de PDFs complejos.
+    """
+    try:
+        parser = LlamaParse(
+            api_key=settings.LLAMA_CLOUD_API_KEY,
+            result_type="markdown",  # Clave: Esto reconstruye las tablas perfectamente
+            language="es",  # Opcional, ayuda con el español
+            verbose=True
+        )
+
+        # LlamaParse procesa el archivo
+        documents = parser.load_data(file_path)
+        return documents
+        
+        # Unir todas las páginas en un solo texto (YA NO SE USA, RETORNAMOS DOCS)
+        # full_text = "\n\n".join([doc.text for doc in documents])
+        # return full_text
+    except Exception as e:
+        logger.error(f"Error extracting text with LlamaParse: {e}")
+        raise e
+
 def process_pdf(document_id):
     """
     Procesa un UploadedDocument:
@@ -36,36 +64,25 @@ def process_pdf(document_id):
         doc = UploadedDocument.objects.get(id=document_id)
         logger.info(f"Procesando documento: {doc.title}")
         
-        # 1. Leer PDF
-        reader = PdfReader(doc.file.path)
-        full_text = ""
-        for page in reader.pages:
-            full_text += page.extract_text() + "\n"
+        # 1. Leer PDF con LlamaParse
+        # reader = PdfReader(doc.file.path)
+        # full_text = ""
+        # for page in reader.pages:
+        #     full_text += page.extract_text() + "\n"
+        
+        # 1. Leer PDF con LlamaParse y obtener Documentos
+        documents = extract_text_from_pdf(doc.file.path)
             
-        if not full_text.strip():
-            logger.warning("El PDF parece estar vacío o no contiene texto extraíble.")
+        if not documents:
+            logger.warning("El PDF parece estar vacío o no contiene documentos.")
             return
 
-        # 2. Chunking (Estrategia simple con overlap)
-        # OpenAI recomienda chunks de ~500-1000 tokens. 
-        # Aproximación: 1 token ~= 4 caracteres. 
-        # Chunk size ~3000 chars, Overlap ~200 chars.
-        CHUNK_SIZE = 3000
-        CHUNK_OVERLAP = 200
+        # 2. Chunking inteligente con MarkdownNodeParser (LlamaIndex)
+        # Esto respeta la estructura de Markdown (tablas, headers)
+        parser = MarkdownNodeParser()
+        nodes = parser.get_nodes_from_documents(documents)
         
-        chunks = []
-        text_len = len(full_text)
-        start = 0
-        
-        while start < text_len:
-            end = min(start + CHUNK_SIZE, text_len)
-            chunk_content = full_text[start:end]
-            chunks.append(chunk_content)
-            
-            # Mover el cursor, retrocediendo un poco (overlap) excepto si ya acabamos
-            if end == text_len:
-                break
-            start = end - CHUNK_OVERLAP
+        chunks = [node.text for node in nodes]
 
         # 3. Eliminar chunks anteriores si existen (re-procesamiento)
         doc.chunks.all().delete()

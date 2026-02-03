@@ -7,7 +7,7 @@ def get_openai_response(user_text, context_text=""):
     """
     Envía el mensaje a OpenAI con un contexto académico inyectado.
     """
-    system_prompt = "Eres un asistente útil de la UAGRM. Responde basándote estrictamente en el contexto proporcionado."
+    system_prompt = "Eres un asistente útil de la UAGRM. Responde basándote estrictamente en el contexto proporcionado. Ordena la información de manera clara y concisa."
     
     # Construimos el mensaje completo con el contexto
     messages = [

@@ -10,6 +10,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-test-key')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 # Reload trigger
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+LLAMA_CLOUD_API_KEY = os.getenv('LLAMA_CLOUD_API_KEY')
 
 ALLOWED_HOSTS = ['*']
 
@@ -25,6 +26,7 @@ INSTALLED_APPS = [
     'apps.authentication',
     'apps.chatbot',
     'apps.institutional',
+    'apps.simulation',
     'rest_framework.authtoken',
     'drf_yasg',
 ]
