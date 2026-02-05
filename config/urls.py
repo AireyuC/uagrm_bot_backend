@@ -28,6 +28,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('apps.authentication.api.urls')),
     path('api/chat/', include('apps.chatbot.api.urls')),
+    path('chat/', include('apps.chatbot.urls')),
     path('api/mock/', include('apps.simulation.urls')),
     
     # Docs

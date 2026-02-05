@@ -6,8 +6,8 @@ from django.contrib.auth import get_user_model
 
 
 from apps.chatbot.models import ChatHistory
-from apps.chatbot.services.ai_handler import get_openai_response
-from apps.chatbot.services.knowledge_retriever import search_knowledge_base
+from apps.chatbot.services.ai_handler import procesar_mensaje
+# from apps.chatbot.services.knowledge_retriever import search_knowledge_base # Ya no es necesario aquí
 
 User = get_user_model()
 
@@ -35,22 +35,8 @@ class ChatBotView(APIView):
             except User.DoesNotExist:
                  current_user = None
 
-        # 2. Búsqueda de Información (Knowledege Base)
-        institutional_context = search_knowledge_base(user_message)
-
-        # 3. Construcción del Prompt (Rol: Asistente Oficial UAGRM)
-        final_context = (
-            f"CONTEXTO PROPORCIONADO:\n"
-            f"{institutional_context}\n"
-            f"--------------------------------------------------\n"
-            f"INSTRUCCIONES:\n"
-            f"Eres un asistente oficial de la UAGRM. Tu única fuente de verdad es el contexto proporcionado (reglamentos, fechas, trámites). "
-            f"Si la información no está en el contexto, responde amablemente que no tienes esa información oficial y sugiere contactar a la universidad. "
-            f"NO inventes datos."
-        )
-
-        # 4. Generación de Respuesta (OpenAI)
-        bot_reply, tokens = get_openai_response(user_message, final_context)
+        # 2. Procesamiento Centralizado (Auth, Privacidad, RAG)
+        bot_reply, tokens = procesar_mensaje(phone_msg, user_message)
 
         # 5. Registro de Historial
         if current_user:
