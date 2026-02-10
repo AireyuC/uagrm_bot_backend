@@ -1,87 +1,68 @@
-# UAGRM Bot Backend
+# Documentación Técnica del Sistema UAGRM Bot (Modo Público)
 
-Backend oficial para el Chatbot Universitario de la UAGRM. Desarrollado con Django Rest Framework e Inteligencia Artificial (OpenAI).
+## 1. Visión General
 
-## 🚀 Características
+El **UAGRM Bot** es un sistema de consultas automatizadas basado en **RAG (Retrieval-Augmented Generation)**. Su objetivo principal es responder preguntas institucionales, académicas y administrativas a través de WhatsApp, utilizando información oficial extraída de documentos PDF subidos por la universidad.
 
-*   **Autenticación**: Sistema de Login con Roles (Estudiante/Docente) y Tokens.
-*   **Chatbot RAG**:
-    *   **Contexto Académico**: Notas y perfil del estudiante (simulado).
-    *   **Contexto Institucional**: Búsqueda en base de conocimientos (Reglamentos, Fechas).
-*   **Documentación API**: Swagger/OpenAPI integrado.
-*   **Demo Web**: Interfaz de chat lista para probar.
+> [!NOTE]
+> **Modo Actual**: El sistema opera en **Modo Público Estricto**. No requiere inicio de sesión y responde a cualquier usuario con información de acceso público.
 
-## 🛠️ Tecnologías
+---
 
-*   Python 3.x
-*   Django 5.0 + DRF
-*   PostgreSQL
-*   OpenAI API (GPT-4o / GPT-4o-mini)
-*   Docker (Opcional)
+## 2. Arquitectura de Ingesta y Conocimiento
 
-## ⚙️ Instalación y Configuración
+El núcleo del conocimiento del bot proviene de documentos PDF procesados y vectorizados.
 
-1.  **Clonar el repositorio**
+### Proceso de Ingesta (ETL)
+1. **Extracción (LlamaParse)**: Los documentos PDF subidos al panel administrativo son procesados por `LlamaParse`. Esta herramienta convierte el contenido visual (texto, tablas, encabezados) en formato Markdown estructurado, preservando la jerarquía de la información.
+2. **Fragmentación (Chunking)**: El texto Markdown se divide en fragmentos lógicos (chunks) para optimizar la búsqueda semántica.
+3. **Indexado Vectorial (PGVector)**: Cada chunk se convierte en un vector numérico (embedding) utilizando modelos de OpenAI (`text-embedding-3-small`) y se almacena en una base de datos PostgreSQL con la extensión `pgvector`.
+
+---
+
+## 3. Módulo de Chatbot (Core)
+
+El flujo de interacción es el siguiente:
+
+1. **Recepción del Mensaje**: El usuario envía una consulta vía WhatsApp (o API directa).
+2. **RAG Retrieval (Búsqueda)**:
+    - El sistema convierte la pregunta del usuario en un vector.
+    - Busca en `PGVector` los fragmentos de conocimiento más similares semánticamente.
+    - Se filtran los resultados para asegurar que solo se use información con `access_level='public'`.
+3. **Síntesis (LLM)**:
+    - Se construye un prompt que incluye: Instrucciones del sistema + Contexto recuperado (fragmentos) + Pregunta del usuario.
+    - Se envía a **OpenAI (GPT-4o-mini)** para generar una respuesta natural y precisa.
+4. **Respuesta**: El bot envía la respuesta generada al usuario.
+
+### Autenticación y Roles (Legacy / Deprecated)
+> [!WARNING]
+> Existe código en el sistema (`StudentConnection`, `MockStudent`) diseñado para autenticación de estudiantes y consultas de datos privados (notas, deudas). **Esta lógica está actualmente DESACTIVADA y COMENTADA** en el código fuente para garantizar el funcionamiento 100% público. Si se descomenta, el sistema tiene la capacidad de manejar roles (`student`, `teacher`) y restringir el acceso a cierta información.
+
+---
+
+## 4. Módulo de Simulación (Mock API)
+
+El proyecto incluye aplicaciones (`apps.simulation`) con modelos como `MockStudent`, `MockAcademicRecord` y `MockFinancialStatus`.
+*   **Estado Actual**: **Inactivo**.
+*   **Propósito Original**: Simular una base de datos universitaria externa (ERP) para pruebas de desarrollo sin conectar a sistemas reales.
+
+---
+
+## 5. Guía de Despliegue Rápido
+
+Para levantar el sistema en un entorno nuevo:
+
+1. **Requisitos**: Docker y Docker Compose instalados.
+2. **Configuración**:
+    - Crear un archivo `.env` basado en `.env.example`.
+    - Definir `OPENAI_API_KEY` y credenciales de base de datos.
+3. **Ejecución**:
     ```bash
-    git clone https://github.com/TU_USUARIO/uagrm_bot_backend.git
-    cd uagrm_bot_backend
+    docker-compose up -d --build
     ```
-
-2.  **Crear entorno virtual**
+4. **Migraciones**:
     ```bash
-    python -m venv venv
-    # Windows
-    venv\Scripts\activate
-    # Linux/Mac
-    source venv/bin/activate
+    docker-compose exec web python manage.py migrate
     ```
-
-3.  **Instalar dependencias**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4.  **Configurar Variables de Entorno (.env)**
-    Crea un archivo `.env` en la raíz (basado en el ejemplo):
-    ```ini
-    DEBUG=True
-    SECRET_KEY=tu_clave_secreta_segura
-    OPENAI_API_KEY=sk-proj-... (Tu Key de OpenAI)
-    
-    # Base de Datos
-    DB_NAME=uagrm_bot_db
-    DB_USER=postgres
-    DB_PASSWORD=tu_password
-    DB_HOST=localhost
-    DB_PORT=5432
-    ```
-
-5.  **Base de Datos**
-    Asegúrate de tener PostgreSQL corriendo y la base de datos creada.
-    ```bash
-    python manage.py migrate
-    python manage.py createsuperuser
-    ```
-
-## ▶️ Ejecución
-
-Iniciar el servidor de desarrollo:
-```bash
-python manage.py runserver
-```
-
-## 🔗 Enlaces de Interés
-
-*   **Demo Chat**: [http://127.0.0.1:8000/demo/](http://127.0.0.1:8000/demo/)
-    *   Prueba el flujo completo de Login + Chat.
-*   **Documentación API (Swagger)**: [http://127.0.0.1:8000/swagger/](http://127.0.0.1:8000/swagger/)
-    *   Explora todos los endpoints disponibles.
-*   **Panel Admin**: [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/)
-    *   Gestiona usuarios, notas simuladas y base de conocimiento.
-
-## 🧪 Testing
-
-Puedes usar el script interactivo incluido para probar desde la terminal:
-```bash
-python prueba_bot.py
-```
+5. **Carga de Datos (Opcional)**:
+    Ingresar al admin panel (`/admin/`) para subir documentos PDF y alimentar la base de conocimiento.

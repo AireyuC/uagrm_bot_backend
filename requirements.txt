@@ -1,7 +1,10 @@
 django
-openai
-psycopg2-binary
-djangorequests
+djangorestframework
 drf-yasg
-framework
 python-dotenv
+psycopg2-binary
+openai
+pgvector
+llama-index
+llama-parse
+nest_asyncio

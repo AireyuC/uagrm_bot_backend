@@ -10,10 +10,11 @@ class UploadedDocument(models.Model):
 
     ACCESS_CHOICES = [
         ('public', 'Público (Todos)'),
-        ('student', 'Solo Estudiantes'),
-        ('teacher', 'Solo Docentes'),
-        ('admin', 'Solo Administrativos'),
-        ('staff', 'Docentes y Administrativos'),
+        # [DEPRECATED-PUBLIC-MODE]
+        # ('student', 'Solo Estudiantes'),
+        # ('teacher', 'Solo Docentes'),
+        # ('admin', 'Solo Administrativos'),
+        # ('staff', 'Docentes y Administrativos'),
     ]
     access_level = models.CharField(
         max_length=20, 

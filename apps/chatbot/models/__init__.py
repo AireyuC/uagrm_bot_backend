@@ -12,6 +12,10 @@ class ChatHistory(models.Model):
         return f"Chat de {self.user.username} - {self.timestamp}"
 
 class StudentConnection(models.Model):
+    """
+    [DEPRECATED] Modelo DEPRECATED. No se usa en la versión actual pública.
+    Diseñado originalmente para vincular cuentas de WhatsApp con registros de estudiantes.
+    """
     phone_number = models.CharField(max_length=20, unique=True, help_text="Número de WhatsApp")
     student_id = models.CharField(max_length=20, help_text="Registro Universitario")
     is_active = models.BooleanField(default=True)
