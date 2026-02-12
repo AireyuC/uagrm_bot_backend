@@ -23,22 +23,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
     'rest_framework',
-    'apps.authentication',
     'apps.chatbot',
     'apps.institutional',
-    'apps.simulation',
-    'rest_framework.authtoken',
     'drf_yasg',
 ]
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -76,7 +64,7 @@ DATABASES = {
         'NAME': os.getenv('DB_NAME', 'uagrm_bot_db'),      # Antes decía 'db_chatBot'
         'USER': os.getenv('DB_USER', 'postgres'),          # Antes decía 'uagrm_admin'
         'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),  # Antes decía 'bot123'
-        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'HOST': os.getenv('DB_HOST', 'db'),
         'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
@@ -91,4 +79,4 @@ USE_TZ = True
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'authentication.CustomUser'
+

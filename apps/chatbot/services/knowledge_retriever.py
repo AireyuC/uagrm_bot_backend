@@ -4,39 +4,20 @@ from pgvector.django import CosineDistance
 from apps.institutional.models import DocumentChunk
 from apps.institutional.services.ingestion import get_embedding
 
-def search_knowledge_base(query_text, user_role='public'):
+def search_knowledge_base(query_text):
     """
     Busca información institucional mediante Búsqueda Vectorial (PDFs).
-    - user_role='public': Solo ve 'public'.
-    - user_role='student': Ve 'public' Y 'student'.
     """
     if not query_text:
         return ""
 
     context_str = ""
 
-    # 1. Definir niveles permitidos
-    niveles_permitidos = ['public']
-    
-    # Lógica de herencia de permisos
-    if user_role == 'student':
-        niveles_permitidos.append('student')
-        
-    elif user_role == 'teacher':
-        niveles_permitidos.append('teacher')
-        niveles_permitidos.append('staff') # El docente ve lo suyo Y lo compartido
-        
-    elif user_role == 'admin':
-        niveles_permitidos.append('admin')
-        niveles_permitidos.append('staff') # El admin ve lo suyo Y lo compartido
-
     # 2. Búsqueda Vectorial (PDFs) - Prioridad Alta
     query_embedding = get_embedding(query_text)
     if query_embedding:
-        # Buscamos los 4 chunks más similares FILTRANDO por permiso
-        vector_results = DocumentChunk.objects.filter(
-            document__access_level__in=niveles_permitidos
-        ).annotate(
+        # Buscamos los 4 chunks más similares sin filtro de rol
+        vector_results = DocumentChunk.objects.annotate(
             distance=CosineDistance('embedding', query_embedding)
         ).order_by('distance')[:4]
 

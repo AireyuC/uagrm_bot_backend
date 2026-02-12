@@ -8,20 +8,7 @@ class UploadedDocument(models.Model):
     file = models.FileField(upload_to='pdfs/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
-    ACCESS_CHOICES = [
-        ('public', 'Público (Todos)'),
-        # [DEPRECATED-PUBLIC-MODE]
-        # ('student', 'Solo Estudiantes'),
-        # ('teacher', 'Solo Docentes'),
-        # ('admin', 'Solo Administrativos'),
-        # ('staff', 'Docentes y Administrativos'),
-    ]
-    access_level = models.CharField(
-        max_length=20, 
-        choices=ACCESS_CHOICES, 
-        default='public',
-        help_text="Quién puede ver este documento en el chat."
-    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'Documento_Subido'

@@ -16,20 +16,16 @@ schema_view = get_schema_view(
 )
 
 from django.contrib.auth.models import Group
-from rest_framework.authtoken.models import TokenProxy
 
 try:
     admin.site.unregister(Group)
-    admin.site.unregister(TokenProxy)
 except Exception:
     pass
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/auth/', include('apps.authentication.api.urls')),
     path('api/chat/', include('apps.chatbot.api.urls')),
     path('chat/', include('apps.chatbot.urls')),
-    path('api/mock/', include('apps.simulation.urls')),
     
     # Docs
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

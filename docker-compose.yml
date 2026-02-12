@@ -1,6 +1,38 @@
+# services:
+#   db:
+#     image: pgvector/pgvector:pg16 # <--- ¡La imagen mágica con vector incluido!
+#     container_name: uagrm_bot_db
+#     restart: always
+#     environment:
+#       - POSTGRES_DB=uagrm_bot_db
+#       - POSTGRES_USER=postgres
+#       - POSTGRES_PASSWORD=postgres
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#
+# volumes:
+#   postgres_data:
+# #
+
 services:
+  # 1. Tu Backend Django (App)
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    env_file:
+      - .env
+
+  # 2. Base de Datos (Con pgvector)
   db:
-    image: pgvector/pgvector:pg16 # <--- ¡La imagen mágica con vector incluido!
+    image: pgvector/pgvector:pg16
     container_name: uagrm_bot_db
     restart: always
     environment:
@@ -12,5 +44,20 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  # 3. n8n
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+    volumes:
+      - n8n_data:/home/node/.n8n
+
 volumes:
   postgres_data:
+  n8n_data: # <--- Importante: El volumen persistente para n8n
