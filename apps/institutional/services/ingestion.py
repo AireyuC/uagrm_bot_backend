@@ -1,5 +1,6 @@
 import logging
 import math
+import re
 import nest_asyncio
 nest_asyncio.apply()
 
@@ -14,6 +15,16 @@ logger = logging.getLogger(__name__)
 
 # Configurar OpenAI (asegúrate de que settings.OPENAI_API_KEY esté seteado)
 openai.api_key = settings.OPENAI_API_KEY
+
+def sanitize_text(text):
+    """
+    Elimina/Enmascara datos sensibles (emails, teléfonos) del texto.
+    """
+    # Email simple regex
+    text = re.sub(r'[\w\.-]+@[\w\.-]+\.\w+', '[EMAIL_PROTECTED]', text)
+    # Teléfonos (celebramos números de 8 a 15 dígitos como posibles teléfonos)
+    text = re.sub(r'\b\d{8,15}\b', '[PHONE_REDACTED]', text)
+    return text
 
 def get_embedding(text):
     """Genera el embedding para un texto dado usando OpenAI."""
@@ -90,11 +101,14 @@ def process_pdf(document_id):
         # 4. Generar Embeddings y Guardar
         chunk_objects = []
         for i, text_chunk in enumerate(chunks):
-            embedding = get_embedding(text_chunk)
+            # SANITIZACIÓN
+            clean_text = sanitize_text(text_chunk)
+            
+            embedding = get_embedding(clean_text)
             if embedding:
                 chunk_obj = DocumentChunk(
                     document=doc,
-                    chunk_text=text_chunk,
+                    chunk_text=clean_text,
                     chunk_index=i,
                     embedding=embedding
                 )

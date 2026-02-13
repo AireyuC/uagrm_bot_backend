@@ -17,7 +17,9 @@ def search_knowledge_base(query_text):
     query_embedding = get_embedding(query_text)
     if query_embedding:
         # Buscamos los 4 chunks más similares sin filtro de rol
-        vector_results = DocumentChunk.objects.annotate(
+        vector_results = DocumentChunk.objects.filter(
+            document__status='APPROVED'
+        ).annotate(
             distance=CosineDistance('embedding', query_embedding)
         ).order_by('distance')[:4]
 

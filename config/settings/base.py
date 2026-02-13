@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
     'rest_framework',
+    'rest_framework_api_key',
     'apps.chatbot',
     'apps.institutional',
     'drf_yasg',
@@ -79,4 +80,5 @@ USE_TZ = True
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY_CUSTOM"
 

@@ -4,11 +4,21 @@ from django.dispatch import receiver
 from pgvector.django import VectorField, HnswIndex
 
 class UploadedDocument(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pendiente'),
+        ('APPROVED', 'Aprobado'),
+        ('REJECTED', 'Rechazado'),
+    ]
+
     title = models.CharField(max_length=255)
     file = models.FileField(upload_to='pdfs/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
-
-
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='PENDING',
+        verbose_name='Estado'
+    )
 
     class Meta:
         verbose_name = 'Documento_Subido'

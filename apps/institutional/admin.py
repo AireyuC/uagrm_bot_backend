@@ -19,8 +19,19 @@ procesar_documentos.short_description = "Procesar PDF (Extraer Texto + Embedding
 
 @admin.register(UploadedDocument)
 class UploadedDocumentAdmin(admin.ModelAdmin):
-    list_display = ('title', 'uploaded_at')
-    actions = [procesar_documentos]
+    list_display = ('title', 'uploaded_at', 'status')
+    list_filter = ('status', 'uploaded_at')
+    actions = [procesar_documentos, 'make_approved', 'make_rejected']
+
+    @admin.action(description='Aprobar documentos seleccionados')
+    def make_approved(self, request, queryset):
+        updated = queryset.update(status='APPROVED')
+        self.message_user(request, f"{updated} documentos aprobados.", messages.SUCCESS)
+
+    @admin.action(description='Rechazar documentos seleccionados')
+    def make_rejected(self, request, queryset):
+        updated = queryset.update(status='REJECTED')
+        self.message_user(request, f"{updated} documentos rechazados.", messages.WARNING)
 
 @admin.register(DocumentChunk)
 class DocumentChunkAdmin(admin.ModelAdmin):
