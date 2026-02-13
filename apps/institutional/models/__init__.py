@@ -8,7 +8,7 @@ class UploadedDocument(models.Model):
     file = models.FileField(upload_to='pdfs/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+
 
     class Meta:
         verbose_name = 'Documento_Subido'
