@@ -106,13 +106,13 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer EAAiqbruKKUIBQi1Q0310eqcrYKVT0Fksedq8AgOkZBBgZAscfx4TivC6vfiJDD2zd1DtnbWrmOYmInHgZCWZC3UcsEEHFdOurwaHSV7UiRuKLcZCW9G5Gfz1dxeEhSOL2gR4VaYmMRAa46rq7jewVdyBWoEFzIL83XR0SLJNvHlZAJnsZCe1GJZB8IAKGBfg9dUUwacQPzu1QnpSzouRQVjLws48BqVZCNLB7NZCrKgRauLVlKYpHUNLWTUZCaSuGULXrfgibnqIf5zqrYibrJ59uaocwZDZD"
+              "value": "Bearer EAAiqbruKKUIBQm2vj2lJuujVuAVxfPJGM7ONndeSeKBTrFbabiLU2SGxtd4cn3ZBN5HUNOGw9Dz6QjoNMYJAreCelBXbZBVk55zjXUxCxIaCeBmSgZC10ZBFuJ7vNIUbwArT49bqfhIXmLoZAMzvHw82kZB3hoTdhZCpTL1KZBvwkBS3ZAdRvq6eJnX6ixiiZA6ayNcMKhxXZBUbRuh3XWsRc9GKd8QVfTIRsTYPNwlYGXJ9PMDN4mIgjM7OTgC5USnSkFce9ZBONMNs3ueE3vW8pMqY"
             }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $node[\"Webhook\"].json.body.entry[0].changes[0].value.messages[0].from }}\",\n  \"text\": {\n    \"body\": \"{{ $json.response }}\"\n  }\n}",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $node['Webhook'].json.body.entry[0].changes[0].value.messages[0].from }}\",\n  \"text\": {\n    \"body\": {{ JSON.stringify($json.response) }}\n  }\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -177,7 +177,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "b0ae94aa-83e6-45fd-93ba-505b42790ed4",
+  "versionId": "3f15757a-966a-4310-8b7e-c37d3377e106",
   "meta": {
     "instanceId": "aea9352418f4e1de1363d5120ae0943e0e8cc87a307063648b176e2c45a61039"
   },
