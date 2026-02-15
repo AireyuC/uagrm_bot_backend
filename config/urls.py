@@ -25,6 +25,8 @@ except Exception:
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/chat/', include('apps.chatbot.api.urls')),
+    path('api/auth/', include('apps.authentication.urls')),
+    path('api/institutional/', include('apps.institutional.urls')),
     path('chat/', include('apps.chatbot.urls')),
     
     # Docs

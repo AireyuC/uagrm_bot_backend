@@ -30,6 +30,19 @@ services:
     env_file:
       - .env
 
+  # 1.5 Frontend React
+  frontend:
+    build:
+      context: ../uagrm_bot_frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ../uagrm_bot_frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+
   # 2. Base de Datos (Con pgvector)
   db:
     image: pgvector/pgvector:pg16

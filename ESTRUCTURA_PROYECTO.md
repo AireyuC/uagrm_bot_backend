@@ -7,7 +7,7 @@ Este documento describe la organización de carpetas y archivos del repositorio 
 ```text
 uagrm_bot_backend/
 ├── 📂 apps/                  # Módulos de la aplicación (Domain Driven Design ligero)
-│   ├── 📂 authentication/    # [Legacy v2.0] Gestión de usuarios y tokens
+│   ├── 📂 authentication/    # [Active] Gestión de usuarios, roles y tokens
 │   ├── 📂 chatbot/           # [Core] Lógica del asistente, RAG y Webhooks
 │   ├── 📂 institutional/     # [Core] Gestión de documentos, LlamaParse y Vectores
 │   └── 📂 simulation/        # [Legacy v2.0] Mock API del sistema académico
@@ -57,9 +57,11 @@ El corazón de la configuración del framework.
 ### 3. Aplicaciones (`apps/`)
 Arquitectura modular donde cada carpeta encapsula una funcionalidad específica.
 
-#### 🔐 `apps/authentication/` (Legacy)
-Maneja la lógica de usuarios, registro y autenticación vía Tokens.
-*   *Nota*: Aunque el sistema opera en "Modo Público", este módulo contiene la estructura de usuarios (CustomUser) necesaria para el admin de Django.
+#### 🔐 `apps/authentication/` (Active)
+Gestión híbrida de usuarios y acceso.
+*   **Roles**: `Admin`, `Verifier`, `Uploader` (Gestionados vía `django.contrib.auth.models.Group`).
+*   **Auth**: Soporta `TokenAuthentication` (Dashboard) y `API Key` (Chatbot público).
+*   **Comandos**: `setup_roles` (Inicializa grupos).
 
 #### 🤖 `apps/chatbot/` (Core System)
 El cerebro del bot.

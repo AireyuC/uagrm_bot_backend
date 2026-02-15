@@ -1,5 +1,5 @@
-import os
 from django.db import models
+from django.contrib.auth.models import User
 from django.dispatch import receiver
 from pgvector.django import VectorField, HnswIndex
 
@@ -12,6 +12,7 @@ class UploadedDocument(models.Model):
 
     title = models.CharField(max_length=255)
     file = models.FileField(upload_to='pdfs/')
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='uploaded_documents')
     uploaded_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
         max_length=10,

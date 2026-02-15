@@ -9,3 +9,4 @@ llama-index
 llama-parse
 nest_asyncio
 djangorestframework-api-key
+django-cors-headers
